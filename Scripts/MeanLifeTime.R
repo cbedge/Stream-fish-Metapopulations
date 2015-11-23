@@ -113,7 +113,7 @@ MMLT.def <- function(node, edge, E=1, N=0.5, U=2){
   print(output)
 }
 
-MMLT.def(node=nodes, edge=edges, E=50, N=0.01, U=2)
+MMLT.def(node=nodes, edge=edges.dam, E=50, N=0.01, U=2)
 
 #Necessary function that must be run
 calc.w.in <- function(data, V, n){ 
@@ -126,4 +126,19 @@ calc.w.in <- function(data, V, n){
     weight <- c(weight, weight1)
   }
   weight
+}
+
+####
+#FUNCTION
+#Calculation of DCIp and DCIs for a defined network
+#li length of segment i
+#lj length of segment j
+#L length of the entire network
+#cij permeability of barrier between segment li and lj
+####
+L <- sum(nodes$Area)
+p <- nrow(nodes)
+x <- 0
+for (i in 1:p){
+  x <- x + (nodes[i,1]/L)
 }
