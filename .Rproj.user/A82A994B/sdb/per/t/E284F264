@@ -1,0 +1,17 @@
+{
+    "contents" : "library(igraph)\n\n#Necessary function that must be run\ncalc.w.in <- function(data, V, n){ \n  weight <- NULL\n  for (j in 1:n){\n    weight1 <- 0\n    for (i in 1:n){\n      weight1 <- weight1 + data[i,j]/V[i]\n    }\n    weight <- c(weight, weight1)\n  }\n  weight\n}\n\n####\n#FUNCTION\n#Calculates metapopulation mean lifetime for a graph with the following inputs\n#REQUIRES nodefile: a dataframe with area, quality, upstream permeability, and downstream permeability of each node\n#REQUIRES graphfile: a graph object that can be any dendritic network describing the structure of the network\n#E Species specific coeffecint relating to patch size, between 1 and 100\n#N level of environmental variation in population growth, between 0.01 and 4. Small is more\n#U number of imigrants needed for succussful colonization\n#E, N, and U can be user defined but defaults are set currently\n####\n\nMMLT.def <- function(nodefile, graphfile, E=1, N=0.5, U=2){\n  p <- nrow(nodefile) #this is a counter variable\n  #first step to to get the edges and permeabilities\n  edge <- data.frame(get.edgelist(graphfile)) #get the edges of the graph\n  edge$PermUS <- (nodefile$PermUS[match(edge$X1, nodefile$ID)]) * 100 #Set Upstream permeability, multiply by 100\n  edge$PermDS <- (nodefile$PermDS[match(edge$X1, nodefile$ID)]) * 100 #Set Downstream permeability, multiply by 100\n  \n  weights <- matrix(nrow=p, ncol=p) #creates matrix of edge weights read as row flows to col\n  for (i in 1:p)\n  {\n    weights[edge[i,1],edge[i,2]] <- edge[i,3]\n    weights[edge[i,2],edge[i,1]] <- edge[i,4]\n  }\n  weights[is.na(weights)] <- 0\n  \n  V<-E*(nodefile$Area^(-N)) #Extinction Rate\n  \n  Uin <- calc.w.in(data=weights, V=V, n=p)\n  Uou <- apply(weights, 1, sum) #Colonization strength out \n  \n  Uset <- rbind(Uin, Uou)\n  \n  U1 <- apply(Uset, 2, function (x) 1/mean(1/x)) #Calculate harmonic mean\n  q <- prod(sapply(subset(U1, U1>0), function(x) x^(1/p))) #Agregate Colonization Rate\n  v <- prod(V) #Agregate Extinction Rate\n  \n  MLT=0\n  for (i in 1:p)\n  {\n    for (k in 1:p)\n    {\n      MLT <- MLT + ( (1/k) * (factorial(p-i)/factorial(p-k)) * (1/((p-1)^(k-i))) * (q^(k-i)) )\n    }\n  }\n  output <- cbind(p,E,N,U,MLT)\n  print(output)\n}\n\nMMLT.def(nodefile=nodes, graphfile=g, E=50, N=0.01, U=2)\n\n",
+    "created" : 1449274140037.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3148954713",
+    "id" : "E284F264",
+    "lastKnownWriteTime" : 1448725525,
+    "path" : "~/Stream fish Metapopulations/Scripts/MeanLifeTime.R",
+    "project_path" : "Scripts/MeanLifeTime.R",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

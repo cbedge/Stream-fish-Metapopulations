@@ -1,0 +1,17 @@
+{
+    "contents" : "library(rgdal)\nlibrary(igraph)\nlibrary(dismo)\n\n#Takes ESRI shapefiles from ARC and and converts them into proper files for calculations\n#Requires a shapefile with stream segment\n\ngetwd()\n\n#turning a shapefile into a graph object\nStream.shp <- readOGR(\"data/Shapefiles\", \"WC_Highland\")\nprint(proj4string(Stream.shp))\n\nStream.mer <- spTransform(Stream.shp,  CRS(\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs\")) #Transform projection to mercator to work with google map\nHighArea<-gmap(Stream.mer, type=\"satellite\")\nplot(HighArea)\nlines(Stream.mer, col=\"blue\", lwd=2.0)\n\n# First build a data.frame of network segment end point coordinates\n# That first line is the hardest part, and there may be a much easier\n# way to do it (e.g. in ArcGIS if you have\n# access to that; but it's nice to have a 'pure R' solution...)\n\nc<-t(sapply(unlist(coordinates(Stream.shp),recursive=FALSE),FUN=function(x) cbind(x[1,],x[nrow(x),])))\nc<-as.data.frame(c)\nnames(c)<-c(\"From.x\",\"From.y\",\"To.x\",\"To.y\")\n\n# Then complete the vertex table\nn2 <- cbind(Stream.shp,c)\nv<-unique(rbind(data.frame(X=n2$From.x,Y=n2$From.y),data.frame(X=n2$To.x,Y=n2$To.y)))\nv$ID <- 1:nrow(v)\n\n# Then match back to the original network coordinates to assign vertex IDs to each feature end point\nn3<-merge(n2,data.frame(From=v$ID,From.x=v$X,From.y=v$Y),by=c(\"From.x\",\"From.y\"))\nn4<-merge(n3,data.frame(To=v$ID,To.x=v$X,To.y=v$Y),by=c(\"To.x\",\"To.y\"))\n\n# Then make an igraph\n# remember igraph indices are 0-based (although if you don't, you'lljust end up with one unconnected vertex labeled 0)\nedge.list <- cbind(n4[,c(\"From\",\"To\")],n4[,grep(\"^(From|To)$\",names(n4),invert=TRUE)])\nedge.list$From <- edge.list$From-1    # 0-based conversion\nedge.list$To <- edge.list$To-1\n\ng <- graph.data.frame(edge.list, directed=F) # All the shapefile attributes are now edge attributes\n\nV(g)$color<-ifelse(V(g)$OBJECTID==157, 'blue', 'red') #useful for highlighting certain people. Works by matching the name attribute of the vertex to the one specified in the 'ifelse' expression\nE(g)$color<-ifelse(E(g)$OBJECTID==0, \"blue\", \"white\")\n\nplot(g, layout=layout.reingold.tilford, vertex.size=2, vertex.label.dist=0.2, vertex.label.cex=0.5, edge.arrow.size=0.5) #plot graph\n\n\nlibrary(Matrix)\nm <- sparseMatrix( i=n4$From, j=n4$To, x=n4$OBJECTID )\n\n\nedge1<-get.edgelist(g)\n\nedge1[edge1[,1]==158,]\n\n\nedge.list[259,]\nedge.list$OBJECTID==74\nvertex.color=\"red\", ",
+    "created" : 1449372632899.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1367394155",
+    "id" : "311ECE92",
+    "lastKnownWriteTime" : 1449200932,
+    "path" : "~/Stream fish Metapopulations/Scripts/Shapefile to graphobject.R",
+    "project_path" : "Scripts/Shapefile to graphobject.R",
+    "properties" : {
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

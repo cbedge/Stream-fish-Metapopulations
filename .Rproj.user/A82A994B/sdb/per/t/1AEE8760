@@ -1,0 +1,17 @@
+{
+    "contents" : "#This script runs analyses on a made up set of data\n\nAplot <- network(50,10) #create adjacency matrix for a  network\ng <- graph.adjacency(t(Aplot), mode=\"directed\")\t#Convert adjacency matrix to a graph object\n\n#lengths <- sample(10:100, 49, replace=T) #length of each segment. One less than the number of nodes because the source (1) is dropped\n#set.edge.attribute(g, \"length\", index=E(g), value=lengths) #set the length of each path\n#set.edge.attribute(g, \"weight\", index=E(g), value=lengths) #set the weight of each path\n\nplot(g, layout=layout.reingold.tilford, vertex.size=4, vertex.label.dist=0.5, vertex.color=\"red\", edge.arrow.size=0.5) #plot graph\n\n####\n#Set the size and qulaity of each of the nodes. These values can also be provided\n####\nID <- 1:50\nArea <- c(0, sample(10:100, 49, replace=T)) #Area of each segment (downstream length in a riverscape). Area of first segment is set as 0 because it is mouth\nQual <- c(100, sample(0:100, 49, replace=T)) #Relative quality of segment where 100 is high and 0 is low. Quality of first segment is set at 100 because it is mouth\nPermDS <- rep(1, 50) #assigning a permeability to move downstream into segment\nPermUS <- rep(1, 50) #Assigning a permeability to move upstream out of segment\nASurv <- rep(1, 50) #Assigning Adult survival in each node\nJSurv <- rep(1, 50) #Assigning Larval survival in each node\nAFec <- rep(10, 50) #Assigning adult fecundity in each node\nnodes <- data.frame(ID, Area, Qual, PermDS, PermUS, ASurv, JSurv, AFec) #create a dataframe with the variables for each node\n\nnodes.dam <- add.dams(nodefile=nodes, dams=20) #Add dams (upstream barriers)\n\nDCI.calc(nodefile = nodes, graphfile = g, mouth = 1)\n\nMMLT.def(nodefile=nodes.dam, graphfile=g, E=1, N=0.5, U=2) #calculate metapopulation meanlifetime\n\nMeta.Growth(nodefile=nodes.dam, graphfile=g)\n",
+    "created" : 1449280601220.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1395618937",
+    "id" : "1AEE8760",
+    "lastKnownWriteTime" : 1449325491,
+    "path" : "~/Stream fish Metapopulations/Scripts/Example Analyses.R",
+    "project_path" : "Scripts/Example Analyses.R",
+    "properties" : {
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

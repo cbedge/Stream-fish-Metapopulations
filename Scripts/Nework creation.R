@@ -2,7 +2,7 @@ library(igraph)
 #The functions below create various types of networks
 
 #creates a random habitat network
-g <- barabasi.game(n=100, power=1, zero.appeal=1.3) # dendritic graph: n is number of patches, power=1, zero.appeal
+g <- barabasi.game(n=50, power=1, zero.appeal=1.3) # dendritic graph: n is number of patches, power=1, zero.appeal
 plot(g, layout=layout_with_fr, vertex.size=4, vertex.label.dist=0.5, vertex.color="red", edge.arrow.size=0.5) #plots g to see what is going on
 
 ####

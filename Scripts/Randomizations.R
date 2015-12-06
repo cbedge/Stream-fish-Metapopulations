@@ -1,17 +1,10 @@
-#This script runs analyses on a made up set of data
+library(igraph)
 
-Aplot <- network(50,10) #create adjacency matrix for a  network
+Aplot <- network(50,35) #create adjacency matrix for a  network
 g <- graph.adjacency(t(Aplot), mode="directed")	#Convert adjacency matrix to a graph object
-
-#lengths <- sample(10:100, 49, replace=T) #length of each segment. One less than the number of nodes because the source (1) is dropped
-#set.edge.attribute(g, "length", index=E(g), value=lengths) #set the length of each path
-#set.edge.attribute(g, "weight", index=E(g), value=lengths) #set the weight of each path
-
 plot(g, layout=layout.reingold.tilford, vertex.size=4, vertex.label.dist=0.5, vertex.color="red", edge.arrow.size=0.5) #plot graph
 
-####
-#Set the size and qulaity of each of the nodes. These values can also be provided
-####
+#Create the starting node attributes
 ID <- 1:50
 Area <- c(0, sample(10:100, 49, replace=T)) #Area of each segment (downstream length in a riverscape). Area of first segment is set as 0 because it is mouth
 Qual <- c(100, sample(0:100, 49, replace=T)) #Relative quality of segment where 100 is high and 0 is low. Quality of first segment is set at 100 because it is mouth
@@ -24,8 +17,32 @@ nodes <- data.frame(ID, Area, Qual, PermDS, PermUS, ASurv, JSurv, AFec) #create 
 
 nodes.dam <- add.dams(nodefile=nodes, dams=20) #Add dams (upstream barriers)
 
-DCI.calc(nodefile = nodes, graphfile = g, mouth = 1)
 
+#Randomization to check how many barriers to add to system to get a reasonable estimate of DCI
+data.out <- NULL
+for (ndams in 1:25){
+  for (i in 1:100){
+    nodes.dam <- add.dams(nodefile=nodes, dams=ndams) #Add dams (upstream barriers)
+    dam.loc <- 
+    res1 <- cbind(DCI.calc(nodefile = nodes.dam, graphfile = g), ndams)
+    data.out <- rbind(data.out, res1)
+  }
+}
+
+DCI.calc(nodefile = nodes.dam, graphfile = g)
 MMLT.def(nodefile=nodes.dam, graphfile=g, E=1, N=0.5, U=2) #calculate metapopulation meanlifetime
-
 Meta.Growth(nodefile=nodes.dam, graphfile=g)
+
+
+
+#Simulations early tests to check variables
+library(lhs)
+data.test <- maximinLHS(n=30, k=5, dup=1)
+
+dams <- 1
+
+Vagi <- data.test[1,1] * 0.5
+ASur <- data.test[1,2] * 0.9
+JSur <- data.test[1,3] * 0.9
+Fecu <- 100 + (data.test[1,4] * 500000)
+Dens <- 2 + (data.test[1,5] * 50)

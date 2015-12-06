@@ -1,0 +1,17 @@
+{
+    "contents" : "####\n#FUNCTION\n#adds a specified number of dams to a list of edges from a graph. Dams have a permeability of 0\n####\n\n\nadd.dams <- function(nodefile, dams){\n   for (i in 1:dams){\n     nodefile$PermUS[sample(1:nrow(nodefile),1)] <- 0\n   }\n  nodefile\n}",
+    "created" : 1449280667260.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2415982504",
+    "id" : "9301B743",
+    "lastKnownWriteTime" : 1448755770,
+    "path" : "~/Stream fish Metapopulations/Scripts/Add Dams.R",
+    "project_path" : "Scripts/Add Dams.R",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

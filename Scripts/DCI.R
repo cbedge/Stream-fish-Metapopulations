@@ -13,22 +13,33 @@
 #PermUS: upstream permeability of the barrier, ranges between 0 (impermeable) and 1 (permeable)
 #
 #REQUIRES a graph object that can be any dendritic network describing the structure of the network
-##
+#mouth is the segment number that is the mouth of the river
+####
+graphfile <- High.g
+nodefile <- Nodes
 
-DCI.calc <- function(nodefile, graphfile){
+length(unique(nodefile$ID))
+unique(nodefile$ID)[2]
+k <-216
+
+nrow(nodefile)
+
+DCI.calc <- function(nodefile, graphfile, mouth){
   #Construct a table with the start and end of each path between all segments, length of that path,
   #the product of the permeabilites of barriers on that path, the length of the start segment, and the length of the last segment
   all.paths <- NULL
-  for (k in 1:nrow(nodefile)) {
+  for (b in 1:length(nodefile$ID)) {
+    k <- unique(nodefile$ID)[b]
     paths <- all_simple_paths(graph=graphfile, from=k, mode = "all") #returns path from a segment to all other segements
     start <- sapply(paths, "[[", 1) #Identify the starting segment
     end <- sapply(paths, tail, 1) #Identify the final segment
     p.length <- NULL 
     pass <- NULL
-    for (j in 1:(nrow(nodefile)-1)) {  
+    for (j in 1:(length(unique(nodefile$ID))-1)) {  
       p.length2 <- 0
       pass2 <- 1
-        for (i in paths[[j]]) {
+        for (c in paths[[j]]) {
+          i <- unique(nodefile$ID)[c]
           p.length2 <- p.length2 + nodefile$Area[i] #length of the path
           pass2 <- pass2 * (nodefile$PermUS[i] * nodefile$PermDS[i])
         }
@@ -39,8 +50,8 @@ DCI.calc <- function(nodefile, graphfile){
     itself <- c(k, k, nodefile$Area[k], nodefile$PermUS[k] * nodefile$PermUS[k])
     all.paths <- rbind(all.paths, all.paths2, itself)
   }  
-  all.paths$Start.Length <- nodes$Area[match(all.paths$start, nodefile$ID)]
-  all.paths$End.Length <- nodes$Area[match(all.paths$end, nodefile$ID)]
+  all.paths$Start.Length <- nodefile$Area[match(all.paths$start, nodefile$ID)]
+  all.paths$End.Length <- nodefile$Area[match(all.paths$end, nodefile$ID)]
 
   #DCIp Calculation
   tot.length <- sum(nodefile$Area)
@@ -51,7 +62,7 @@ DCI.calc <- function(nodefile, graphfile){
 
   #Calculate DCId
   DCId <- 0
-  DCId.data <- all.paths[all.paths$end==1, ]
+  DCId.data <- all.paths[all.paths$end==mouth, ]
   for (i in 1:nrow(DCId.data)){
     DCId <- DCId + (DCId.data$pass[i] * (DCId.data$Start.Length[i]/tot.length))
   }

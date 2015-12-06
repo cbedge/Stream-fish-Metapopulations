@@ -1,0 +1,18 @@
+{
+    "contents" : "#Taking an edge matrix, barrier data, adn segmetn data and making a graph object\n\nlibrary(igraph)\n\nEdgeWBarID <- read.csv(file=\"data/StreamNodesAndEdges/High_EdgeList_corrected.csv\", header=T)\nHighEdge <- EdgeWBarID[,2:3]\n\nHigh.g <- graph.data.frame(HighEdge, directed=TRUE)\n\nHigh.g2 <- graph.data.frame(HighEdge, vertices = Nodes, directed=TRUE)\nV(High.g)$color<-ifelse(158, 'blue', 'red') #useful for highlighting certain people. Works by matching the name attribute of the vertex to the one specified in the 'ifelse' expression\nE(High.g2)$color<-ifelse(158, \"blue\", \"red\")\n\njpeg(file = \"high.jpeg\", width=20, height=20, units=\"cm\", res=600)\nplot(High.g, layout=layout.reingold.tilford, vertex.size=2, vertex.label.cex=0.5, vertex.label.dist=0.2, vertex.color=\"red\", edge.arrow.size=0.1) #plot graph                 \ndev.off()\n\n#For this to run correctly segments must be labelled 1, 2, 3... with no missig segments\n#Turn an edge list into an adjacency matrix and then create the graph. Currently this works. I am not sure if other methods work too\nHigh.adj <- matrix(0, nrow=256, ncol=256)\nfor (i in 1:255)\n{\n  High.adj[HighEdge[i,2], HighEdge[i,1]] <- 1\n}\n\nHigh.g3 <- graph.adjacency(t(High.adj), mode=\"directed\")\nplot(High.g3, layout=layout.reingold.tilford, vertex.size=2, vertex.label.cex=0.5, vertex.label.dist=0.2, vertex.color=\"red\", edge.arrow.size=0.1) #plot graph                  \n\nNodes <- read.csv(file=\"data/StreamNodesAndEdges/High_JunctDSSeg_corrected.csv\", header=T)\nBarr.attr <- read.csv(file=\"data/StreamNodesAndEdges/HighJunctions_corrected.csv\", header=T)\nNodes.attr <- read.csv(file=\"data/StreamNodesAndEdges/HighSegs_corrected.csv\", header=T)\n\nnames(Nodes)\ncolnames(Nodes) <- c(\"Junction\", \"ID\")\nNodes$Area <- Nodes.attr$Shape_Length[match(Nodes$ID, Nodes.attr$OBJECTID)]\nNodes$Qual <- 100\nNodes$PermDS <- 1 #assigning a permeability to move downstream into segment\nNodes$PermUS <- 1 #Assigning a permeability to move upstream out of segment\nNodes$ASurv <- 1 #Assigning Adult survival in each node\nNodes$JSurv <- 1 #Assigning Larval survival in each node\nNodes$AFec <- 1                 \nNodes <- Nodes[,-1]\n\nBarr.attr$perm[match(Nodes$Junction, Barr.attr$OBJECTID)]\ngetwd()\n\nDCI.calc(nodefile = Nodes, graphfile = High.g3, mouth=158)\n\nwrite.csv(end, file=\"ends.csv\")\n\n",
+    "created" : 1449370848857.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1029213346",
+    "id" : "131F9D2E",
+    "lastKnownWriteTime" : 1449381801,
+    "path" : "~/Stream fish Metapopulations/Scripts/HighlandTestAnalyses.R",
+    "project_path" : "Scripts/HighlandTestAnalyses.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
